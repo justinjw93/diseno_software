@@ -43,7 +43,6 @@ public final class App {
                 "E001", "Justin", "Arreaga", "justin.arreaga@uees.edu.ec", "Computacion", 5);
 
         Reserva reserva = servicioReservas.crearReserva(estudiante, horario.getId());
-        repositorioReservas.guardar(reserva);
 
         servicioReservas.confirmarReserva(reserva.getId());
         servicioReservas.cancelarReserva(reserva.getId());
