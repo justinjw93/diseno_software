@@ -1,0 +1,148 @@
+@startuml modelo-clases
+title Sistema de gestion de tutorias - Diagrama de clases (Ae1)
+
+skinparam classAttributeIconSize 0
+hide circle
+skinparam class {
+    BackgroundColor White
+    ArrowColor #444444
+    BorderColor #444444
+}
+
+package "domain" {
+    abstract class Usuario {
+        - id: String
+        - nombre: String
+        - apellido: String
+        - correo: String
+        + nombreCompleto(): String
+    }
+
+    class Estudiante {
+        - carrera: String
+        - semestre: int
+    }
+
+    class Docente {
+        - especialidad: String
+        - asignaturas: List<Asignatura>
+        + agregarAsignatura(a: Asignatura): void
+    }
+
+    class Asignatura {
+        - codigo: String
+        - nombre: String
+    }
+
+    enum EstadoHorario {
+        DISPONIBLE
+        RESERVADO
+        INACTIVO
+    }
+
+    class HorarioTutoria {
+        - id: String
+        - fecha: LocalDate
+        - horaInicio: LocalTime
+        - horaFin: LocalTime
+        - estado: EstadoHorario
+        + estaDisponible(): boolean
+        + marcarReservado(): void
+        + liberar(): void
+        + marcarInactivo(): void
+    }
+
+    enum EstadoReserva {
+        PENDIENTE
+        CONFIRMADA
+        CANCELADA
+        REALIZADA
+    }
+
+    class Reserva {
+        - id: String
+        - fechaCreacion: LocalDateTime
+        - estado: EstadoReserva
+        + confirmar(): void
+        + cancelar(): void
+        + marcarRealizada(): void
+        + reprogramar(nuevoHorario: HorarioTutoria): void
+    }
+
+    Usuario <|-- Estudiante
+    Usuario <|-- Docente
+    Docente "1" -- "0..*" Asignatura : imparte >
+    HorarioTutoria "0..*" -- "1" Docente : titular >
+    HorarioTutoria "0..*" -- "1" Asignatura
+    HorarioTutoria -- EstadoHorario
+    Reserva "0..*" -- "1" Estudiante : solicitada por >
+    Reserva "1" -- "1" HorarioTutoria : ocupa >
+    Reserva -- EstadoReserva
+}
+
+package "persistence" {
+    interface RepositorioReservas {
+        + guardar(r: Reserva): void
+        + buscarPorId(id: String): Optional<Reserva>
+        + listarPorEstudiante(e: Estudiante): List<Reserva>
+    }
+
+    class RepositorioReservasEnMemoria {
+        + guardar(r: Reserva): void
+        + buscarPorId(id: String): Optional<Reserva>
+        + listarPorEstudiante(e: Estudiante): List<Reserva>
+    }
+
+    interface RepositorioHorarios {
+        + guardar(h: HorarioTutoria): void
+        + buscarPorId(id: String): Optional<HorarioTutoria>
+        + listarDisponiblesPorDocente(d: Docente): List<HorarioTutoria>
+    }
+
+    class RepositorioHorariosEnMemoria {
+        + guardar(h: HorarioTutoria): void
+        + buscarPorId(id: String): Optional<HorarioTutoria>
+        + listarDisponiblesPorDocente(d: Docente): List<HorarioTutoria>
+    }
+
+    RepositorioReservasEnMemoria ..|> RepositorioReservas
+    RepositorioHorariosEnMemoria ..|> RepositorioHorarios
+    RepositorioReservas ..> Reserva
+    RepositorioHorarios ..> HorarioTutoria
+}
+
+package "notification" {
+    interface Notificador {
+        + notificar(destinatario: String, asunto: String, mensaje: String): void
+    }
+
+    class NotificadorConsola {
+        + notificar(destinatario: String, asunto: String, mensaje: String): void
+    }
+
+    class NotificadorLog {
+        + notificar(destinatario: String, asunto: String, mensaje: String): void
+    }
+
+    NotificadorConsola ..|> Notificador
+    NotificadorLog ..|> Notificador
+}
+
+package "service" {
+    class ServicioReservas {
+        - repositorioReservas: RepositorioReservas
+        - repositorioHorarios: RepositorioHorarios
+        - notificador: Notificador
+        + crearReserva(e: Estudiante, idHorario: String): Reserva
+        + confirmarReserva(idReserva: String): void
+        + cancelarReserva(idReserva: String): void
+        + reprogramarReserva(idReserva: String, idNuevoHorario: String): void
+    }
+
+    ServicioReservas ..> RepositorioReservas : usa >
+    ServicioReservas ..> RepositorioHorarios : usa >
+    ServicioReservas ..> Notificador : usa >
+    ServicioReservas ..> Reserva : crea >
+}
+
+@enduml
