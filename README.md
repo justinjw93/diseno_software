@@ -87,4 +87,4 @@ sistema-tutorias/
 
 ## Declaración de uso de inteligencia artificial
 
-Durante el desarrollo de esta actividad utilicé herramientas de inteligencia artificial (Claude) como apoyo para: organizar el análisis del dominio a partir del caso de estudio trabajado en clase, generar una primera versión de las clases Java, el diagrama UML y este README, y redactar la justificación de cohesión, acoplamiento y principios SOLID. Verifiqué el código generado (compilación con `javac`/JDK 21 y ejecución del flujo de `App.java`), lo adapté a los requisitos de la actividad y puedo explicar y justificar las decisiones de diseño y el código presentados.
+Me apoyé en el modelo Claude para agilizar la organización del caso de estudio, la generación preliminar del código en Java, el diseño de diagramas UML, la documentación en el README. Todo el código fue revisado, modificado e inspeccionado mediante ejecución y compilación (`javac`/JDK 26), garantizando el cumplimiento estricto de los requerimientos y asegurando mi total comprensión de las decisiones técnicas tomadas.
